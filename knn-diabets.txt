@@ -1,0 +1,78 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score,recall_score
+# Load the dataset
+df = pd.read_csv('diabetes.csv')
+# Split the dataset into features (X) and target (y)
+X = df.drop('Outcome', axis=1)
+y = df['Outcome']
+# Split the data into training and test sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2,random_state=42)
+# Standardize the data
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+# Initialize the KNN classifier with k=5
+knn = KNeighborsClassifier(n_neighbors=5)
+# Fit the model on the training data
+knn.fit(X_train, y_train)
+# Predict the outcomes on the test data
+y_pred = knn.predict(X_test)
+# Compute the confusion matrix
+conf_matrix = confusion_matrix(y_test, y_pred)
+# Compute accuracy, error rate, precision, and recall
+
+
+
+accuracy = accuracy_score(y_test, y_pred)
+error_rate = 1 - accuracy
+precision = precision_score(y_test, y_pred)
+recall = recall_score(y_test, y_pred)
+# Print the results
+print(f"Confusion Matrix:\n{conf_matrix}")
+print(f"Accuracy: {accuracy * 100:.2f}%")
+print(f"Error Rate: {error_rate * 100:.2f}%")
+print(f"Precision: {precision:.2f}")
+print(f"Recall: {recall:.2f}")
+
+
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Plot the confusion matrix as a heatmap
+plt.figure(figsize=(8, 6))
+sns.heatmap(conf_matrix, annot=True, fmt='d', cmap='Blues', cbar=False)
+plt.xlabel('Predicted Labels')
+plt.ylabel('True Labels')
+plt.title('Confusion Matrix')
+plt.show()
+
+
+import matplotlib.pyplot as plt
+
+# Metrics to plot
+metrics = ['Accuracy', 'Error Rate', 'Precision', 'Recall']
+values = [accuracy * 100, error_rate * 100, precision * 100, recall * 100]
+
+# Plot the bar chart
+plt.figure(figsize=(10, 6))
+plt.bar(metrics, values, color=['green', 'red', 'blue', 'orange'])
+plt.xlabel('Metrics')
+plt.ylabel('Percentage (%)')
+plt.title('Model Performance Metrics')
+plt.ylim(0, 100)  # Set y-axis limit from 0 to 100
+for i, value in enumerate(values):
+    plt.text(i, value + 1, f'{value:.2f}%', ha='center', fontsize=10)  # Annotate the bars
+
+plt.show()
+
+
+
+
+
+
+
+

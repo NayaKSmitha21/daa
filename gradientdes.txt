@@ -1,0 +1,50 @@
+# Gradient Descent Algorithm to find the local minima of y = (x+3)^2
+import numpy as np
+import matplotlib.pyplot as plt
+# Define the function and its derivative
+def function(x):
+  return (x + 3) ** 2
+def gradient(x):
+  return 2 * (x + 3)
+# Gradient Descent function
+def gradient_descent(starting_x, learning_rate, num_iterations):
+  x = starting_x
+  x_values = [x] # To store values for plotting
+  y_values = [function(x)]
+  for i in range(num_iterations):
+     grad = gradient(x)
+     x = x - learning_rate * grad
+# Store the values
+     x_values.append(x)
+     y_values.append(function(x))
+     print(f"Iteration {i+1}: x = {x}, f(x) = {function(x)}")
+  return x, x_values, y_values
+# Parameters
+starting_x = 2 # Starting point
+learning_rate = 0.1 # Learning rate
+num_iterations = 20 # Number of iterations
+# Run Gradient Descent
+
+
+
+
+
+final_x, x_values, y_values = gradient_descent(starting_x, learning_rate,num_iterations)
+# Plot the results
+plt.figure(figsize=(8, 6))
+x_range = np.linspace(-6, 3, 100)
+y_range = function(x_range)
+plt.plot(x_range, y_range, label='y = (x + 3)^2', color='blue')
+plt.scatter(x_values, y_values, color='red', label='Gradient Descent steps')
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Gradient Descent to Minimize y = (x + 3)^2')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+
+
+
+
+

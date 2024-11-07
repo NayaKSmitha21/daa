@@ -1,0 +1,89 @@
+import java.util.Scanner;
+
+public class NQueens {
+    // Size of the chess board (determined by user input)
+    static int N;
+
+    // Function to print the board
+    public static void printBoard(int[][] board) {
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                System.out.print(board[i][j] + " ");
+            }
+            System.out.println();
+        }
+    }
+
+    // Function to check if placing a queen at board[row][col] is safe
+    public static boolean isSafe(int[][] board, int row, int col) {
+        // Check this row on left side
+        for (int i = 0; i < col; i++) {
+            if (board[row][i] == 1) {
+                return false;
+            }
+        }
+        // Check upper diagonal on left side
+        for (int i = row, j = col; i >= 0 && j >= 0; i--, j--) {
+            if (board[i][j] == 1) {
+                return false;
+            }
+        }
+        // Check lower diagonal on left side
+        for (int i = row, j = col; i < N && j >= 0; i++, j--) {
+            if (board[i][j] == 1) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // Function to solve the N-Queens problem using backtracking
+public static boolean solveNQueens(int[][] board, int col) {
+// If all queens are placed, return true
+if (col >= N) {
+return true;
+}
+// Consider this column and try placing the queen in all rows one by one
+for (int i = 0; i < N; i++) {
+if (isSafe(board, i, col)) {
+// Place this queen in board[i][col]
+board[i][col] = 1;
+// Recur to place the rest of the queens
+if (solveNQueens(board, col + 1)) {
+return true;
+} // If placing queen in board[i][col] doesn't lead to asolution, remove the queen
+board[i][col] = 0;
+}
+} // If the queen can't be placed in any row in this column, return false
+return false;
+}
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter the number of queens (N): ");
+        N = sc.nextInt();
+        // Initialize the chess board with all zeros
+        int[][] board = new int[N][N];
+        // Start solving from the first column
+        if (solveNQueens(board, 0)) {
+            System.out.println("Final N-Queens Matrix:");
+            printBoard(board);
+        } else {
+            System.out.println("Solution does not exist.");
+        }
+        sc.close();
+    }
+}
+/*
+ * Output:
+ * Enter the number of queens (N): 8
+ * Final N-Queens Matrix:
+ * 1 0 0 0 0 0 0 0
+ * 0 0 0 0 1 0 0 0
+ * 0 0 0 0 0 0 1 0
+ * 0 1 0 0 0 0 0 0
+ * 0 0 0 0 0 1 0 0
+ * 0 0 1 0 0 0 0 0
+ * 0 0 0 0 0 0 0 1
+ * 0 0 0 1 0 0 0 0
+ */

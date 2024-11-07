@@ -1,0 +1,131 @@
+import java.util.*;
+class KnapsackBB {
+// Class to represent a node in the decision tree
+static class Node {
+int level, profit, bound, weight;
+public Node(int level, int profit, int weight, int bound) {
+this.level = level;
+this.profit = profit;
+this.weight = weight;
+this.bound = bound;
+}
+@Override
+public String toString() {
+return "[Level: " + level + ", Profit: " + profit + ", Weight: " + weight + ", Bound: " +
+bound + "]";
+}
+}
+// Function to calculate upper bound
+public static int bound(Node u, int n, int W, int[] weights, int[] values) {
+if (u.weight >= W) {
+return 0; // If weight exceeds capacity, bound is 0
+} int profitBound =
+u.profit;
+int j = u.level + 1;
+int totalWeight = u.weight;
+// Add items while the weight doesn't exceed capacity
+while (j < n && totalWeight + weights[j] <= W) {
+totalWeight += weights[j];
+profitBound += values[j];
+j++;
+}
+// Add the fraction of the next item if applicable
+if (j < n) {
+profitBound += (W - totalWeight) * values[j] / weights[j];
+}
+return profitBound;
+}
+// Solves 0-1 Knapsack using Branch and Bound
+public static int knapsack(int[] weights, int[] values, int W) {
+int n = values.length;
+// Sorting items by value-to-weight ratio
+Integer[] idx = new Integer[n];
+for (int i = 0; i < n; i++) idx[i] = i;
+Arrays.sort(idx, (i, j) -> Double.compare((double) values[j] / weights[j], (double) values[i]
+/ weights[i]));
+System.out.println("Items sorted by value-to-weight ratio:");
+for (int i = 0; i < n; i++) {
+System.out.println("Item " + idx[i] + ": Value = " + values[idx[i]] + ", Weight = " +
+weights[idx[i]] +
+", Ratio = " + (double) values[idx[i]] / weights[idx[i]]);
+}
+// Priority queue for best-first search
+Queue<Node> queue = new LinkedList<>();
+Node u, v;
+v = new Node(-1, 0, 0, 0); // Starting at root
+queue.offer(v);
+int maxProfit = 0;
+while (!queue.isEmpty()) {
+v = queue.poll();
+System.out.println("Exploring node: " + v);
+if (v.level == -1) {
+u = new Node(0, 0, 0, 0);
+} else if (v.level == n - 1) {
+continue; // End of tree
+} else {
+u = new Node(v.level + 1, 0, 0, 0);
+}
+// Explore node where we include the next item
+u.weight = v.weight + weights[idx[u.level]];
+u.profit = v.profit + values[idx[u.level]];
+if (u.weight <= W && u.profit > maxProfit) {
+maxProfit = u.profit;
+System.out.println("Updated maxProfit to: " + maxProfit);
+}
+u.bound = bound(u, n, W, weights, values);
+System.out.println("Bound after including item: " + u.bound);
+if (u.bound > maxProfit) {
+System.out.println("Including this node as bound > maxProfit");
+queue.offer(new Node(u.level, u.profit, u.weight, u.bound));
+}
+// Explore node where we don't include the next item
+u.weight = v.weight;
+u.profit = v.profit;
+u.bound = bound(u, n, W, weights, values);
+System.out.println("Bound after excluding item: " + u.bound);
+if (u.bound > maxProfit) {
+System.out.println("Including this node as bound > maxProfit");
+queue.offer(new Node(u.level, u.profit, u.weight, u.bound));
+}
+}
+return maxProfit;
+}
+public static void main(String[] args) {
+Scanner scanner = new Scanner(System.in);
+// User input for number of items
+System.out.println("Enter the number of items:");
+int n = scanner.nextInt();
+// Arrays to hold weights and values
+int[] weights = new int[n];
+int[] values = new int[n];
+// Input weights and values
+for (int i = 0; i < n; i++) {
+System.out.println("Enter weight and value for item " + (i + 1) + ": ");
+weights[i] = scanner.nextInt();
+values[i] = scanner.nextInt();
+}
+// Input the capacity of the knapsack
+System.out.println("Enter the capacity of the knapsack:");
+int W = scanner.nextInt();
+// Calling the knapsack method
+System.out.println("Maximum value we can obtain = " + knapsack(weights, values, W));
+}
+}
+/* 
+Output :
+Enter the number of items:
+3
+Enter weight and value for item 1:
+10 60
+Enter weight and value for item 2:
+20 100
+Enter weight and value for item 3:
+30 120
+Enter the capacity of the knapsack:
+50
+Items sorted by value-to-weight ratio:
+Item 0: Value = 60, Weight = 10, Ratio = 6.0
+Item 1: Value = 100, Weight = 20, Ratio = 5.0
+Item 2: Value = 120, Weight = 30, Ratio = 4.0
+Exploring node: [Level: -1, Profit: 0, Weight: 0, Bound: 0]
+Maximum value we can obtain = 220*/

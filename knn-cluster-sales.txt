@@ -1,0 +1,125 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+
+# Load the dataset with a specified encoding to avoid UnicodeDecodeError
+df = pd.read_csv('sales_data_sample.csv', encoding='ISO-8859-1')
+
+# Select relevant features for clustering
+# We will use 'QUANTITYORDERED', 'PRICEEACH', and 'SALES'
+features = df[['QUANTITYORDERED', 'PRICEEACH', 'SALES']]
+
+# Scale the data
+scaler = StandardScaler()
+scaled_features = scaler.fit_transform(features)
+
+# Elbow method to find the optimal number of clusters
+wcss = []  # List to store the within-cluster sum of squares
+
+# Trying different values of k (number of clusters)
+for i in range(1, 11):
+    kmeans = KMeans(n_clusters=i, init='k-means++', random_state=42)
+    kmeans.fit(scaled_features)
+    wcss.append(kmeans.inertia_)  # Inertia: Sum of squared distances to closest cluster center
+
+# Plotting the elbow graph
+plt.figure(figsize=(8, 5))
+plt.plot(range(1, 11), wcss, marker='o', linestyle='--')
+plt.title('Elbow Method')
+plt.xlabel('Number of clusters')
+plt.ylabel('WCSS')
+plt.show()
+
+# Based on the elbow plot, choose the optimal number of clusters (let's say 3)
+optimal_clusters = 3
+
+# Perform K-Means clustering
+kmeans = KMeans(n_clusters=optimal_clusters, init='k-means++', random_state=42)
+df['Cluster'] = kmeans.fit_predict(scaled_features)
+
+# Print the resulting clusters
+print(df[['ORDERNUMBER', 'QUANTITYORDERED', 'PRICEEACH', 'SALES', 'Cluster']])
+
+
+
+
+
+
+
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import silhouette_score
+from sklearn.decomposition import PCA
+
+# Load the dataset with a specified encoding to avoid UnicodeDecodeError
+df = pd.read_csv('sales_data_sample.csv', encoding='ISO-8859-1')
+
+# Select relevant features for clustering
+features = df[['QUANTITYORDERED', 'PRICEEACH', 'SALES']]
+
+# Scale the data
+scaler = StandardScaler()
+scaled_features = scaler.fit_transform(features)
+
+# Elbow method to find the optimal number of clusters
+wcss = []  # List to store the within-cluster sum of squares
+
+# Trying different values of k (number of clusters)
+for i in range(1, 11):
+    kmeans = KMeans(n_clusters=i, init='k-means++', random_state=42)
+    kmeans.fit(scaled_features)
+    wcss.append(kmeans.inertia_)  # Inertia: Sum of squared distances to closest cluster center
+
+# Plotting the elbow graph
+plt.figure(figsize=(8, 5))
+plt.plot(range(1, 11), wcss, marker='o', linestyle='--')
+plt.title('Elbow Method')
+plt.xlabel('Number of clusters')
+plt.ylabel('WCSS')
+plt.show()
+
+# Based on the elbow plot, choose the optimal number of clusters (let's say 3)
+optimal_clusters = 3
+
+# Perform K-Means clustering
+kmeans = KMeans(n_clusters=optimal_clusters, init='k-means++', random_state=42)
+df['Cluster'] = kmeans.fit_predict(scaled_features)
+
+# Print the resulting clusters
+print(df[['ORDERNUMBER', 'QUANTITYORDERED', 'PRICEEACH', 'SALES', 'Cluster']])
+
+# 1. Visualize the clusters in 2D using PCA for dimensionality reduction
+pca = PCA(n_components=2)
+reduced_data = pca.fit_transform(scaled_features)
+
+plt.figure(figsize=(8, 6))
+plt.scatter(reduced_data[:, 0], reduced_data[:, 1], c=df['Cluster'], cmap='viridis', s=50)
+plt.title('KMeans Clusters (2D PCA projection)')
+plt.xlabel('PCA Component 1')
+plt.ylabel('PCA Component 2')
+plt.colorbar(label='Cluster')
+plt.show()
+
+# 2. Visualize the cluster centers
+cluster_centers = pca.transform(kmeans.cluster_centers_)  # Project the centers onto 2D space using PCA
+plt.figure(figsize=(8, 6))
+plt.scatter(reduced_data[:, 0], reduced_data[:, 1], c=df['Cluster'], cmap='viridis', s=50)
+plt.scatter(cluster_centers[:, 0], cluster_centers[:, 1], c='red', marker='x', s=100, label='Cluster Centers')
+plt.title('KMeans Clusters with Cluster Centers')
+plt.xlabel('PCA Component 1')
+plt.ylabel('PCA Component 2')
+plt.colorbar(label='Cluster')
+plt.legend()
+plt.show()
+
+# 3. Evaluate the clustering using Silhouette Score
+sil_score = silhouette_score(scaled_features, df['Cluster'])
+print(f"Silhouette Score: {sil_score:.4f}")
+
+# 4. Analyze the cluster centers
+print("Cluster Centers (in the scaled feature space):")
+print(kmeans.cluster_centers_)
+
